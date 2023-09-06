@@ -1,7 +1,7 @@
 <h1> List of Pets </h1>
 <ul>
-    % for pet in pets:
-        <li>{{ pet['name'] }}</li>
+    % for pet in data:
+        <li>{{ pet[1] }}</li>
     % end
 </ul>
 
@@ -9,15 +9,16 @@
 
 <table>
     <thead>
-        <th>Name</th>
-        <th>Kind</th>
+    % for name in names[1:] :
+        <th>{{name}}</th>
+    % end
     </thead>
 
     <tbody>
-    % for pet in pets:
+    % for pet in data :
         <tr>
-            <td>{{pet['name']}}</td>
-            <td>{{pet['kind']}}</td>
+            <td>{{pet[1]}}</td>
+            <td>{{pet[2]}}</td>
         </tr>
     % end
     </tbody>

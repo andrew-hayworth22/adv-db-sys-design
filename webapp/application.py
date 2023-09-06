@@ -1,4 +1,5 @@
 from bottle import route, run, template
+import sqlite3
 
 @route('/')
 def get_index():
@@ -28,7 +29,14 @@ pets = [
 
 @route('/pets')
 def get_pets():
-    return template('views/pets.tpl', pets=pets)
+    connection = sqlite3.connect("pets.db")
+    cursor = connection.cursor()
+
+    result = cursor.execute("select * from pet")
+    data = result.fetchall()
+    names = [item[0] for item in list(cursor.description)]
+
+    return template('views/pets.tpl', names=names, data=data)
 
 
 run(host='localhost', port=8080)
