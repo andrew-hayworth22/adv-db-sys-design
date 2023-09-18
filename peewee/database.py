@@ -1,56 +1,48 @@
-import sqlite3
+import dataset
 
-connection = sqlite3.connect('shopping-list.db')
+db = dataset.connect('sqlite:///shopping-list.db')
 
 def set_up_database() :
-    cursor = connection.cursor()
-
     try:
-        cursor.execute("drop table list")
+        db['list'].drop()
     except:
         pass
 
-    cursor.execute("create table list(id integer primary key, description text)")
+    list_table = db['list']
 
     for item in ['apples', 'broccoli', 'pizza', 'tangerine', 'potatoes']:
-        cursor.execute(f"insert into list (description) values ('{item}')")
-
-    connection.commit()
+        list_table.insert({"description": item})
 
 def get_items() :
-    cursor = connection.cursor()
-    rows = cursor.execute("select id, description from list")
-    rows = list(rows)
-    rows = [ {'id': row[0], 'description': row[1]} for row in rows ]
+    list_table = db['list']
+
+    rows = list_table.find()
+    rows = [ dict(row) for row in rows ]
     return rows
 
 def add_item(description) :
-    cursor = connection.cursor()
-    cursor.execute(f"insert into list(description) values ('{description}')")
-    connection.commit()
+    list_table = db['list']
+    list_table.insert({"description": description})
 
 def get_item(id) :
-    cursor = connection.cursor()
-    rows = cursor.execute(f"select id, description from list where id = {id}")
-    rows = list(rows)
-    rows = [ {'id': row[0], 'description': row[1]} for row in rows ]
-    return rows[0];
+    list_table = db['list']
+    row = list_table.find_one(id=id)
+    return dict(row);
 
 def update_item(id, description) :
-    cursor = connection.cursor()
-    cursor.execute(f"update list set description = '{description}' where id = {id}")
-    connection.commit()
+    list_table = db['list']
+    list_table.update({ "id": id, "description": description }, ["id"])
 
 def delete_item(id) :
-    cursor = connection.cursor()
-    cursor.execute(f"delete from list where id = {id}")
-    connection.commit()
+    list_table = db['list']
+    list_table.delete(id=id)
 
 def test_set_up_database() :
     print("Testing set up database...")
     set_up_database()
 
-    items = get_items();
+    list_table = db['list'];
+    items = [dict(item) for item in list_table.find()];
     assert len(items) == 5
 
     descriptions = [item['description'] for item in items]
