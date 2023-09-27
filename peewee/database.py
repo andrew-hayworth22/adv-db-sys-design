@@ -1,48 +1,46 @@
-import dataset
+from peewee import *
 
-db = dataset.connect('sqlite:///shopping-list.db')
+db = SqliteDatabase('list.db')
+db.connect();
+
+
+class Item(Model):
+    description = CharField()
+    class Meta:
+        database = db # This model uses the "people.db" database.
 
 def set_up_database() :
-    try:
-        db['list'].drop()
-    except:
-        pass
+    db.drop_tables([Item], safe=True)
+    db.create_tables([Item])
 
-    list_table = db['list']
-
-    for item in ['apples', 'broccoli', 'pizza', 'tangerine', 'potatoes']:
-        list_table.insert({"description": item})
+    for description in ['apples', 'broccoli', 'pizza', 'tangerine', 'potatoes']:
+        item = Item(description=description) 
+        item.save()
 
 def get_items() :
-    list_table = db['list']
-
-    rows = list_table.find()
-    rows = [ dict(row) for row in rows ]
-    return rows
+    items = [{"id": item.id, "description": item.description} for item in Item.select()]
+    return items
 
 def add_item(description) :
-    list_table = db['list']
-    list_table.insert({"description": description})
+    item = Item(description=description)
+    item.save()
 
 def get_item(id) :
-    list_table = db['list']
-    row = list_table.find_one(id=id)
-    return dict(row);
+    item = Item.get(Item.id == id)
+    return {"id": item.id, "description": item.description};
 
 def update_item(id, description) :
-    list_table = db['list']
-    list_table.update({ "id": id, "description": description }, ["id"])
+    item = Item(id=id, description=description)
+    item.save()
 
 def delete_item(id) :
-    list_table = db['list']
-    list_table.delete(id=id)
+    Item.get(id=id).delete_instance()
 
 def test_set_up_database() :
     print("Testing set up database...")
     set_up_database()
 
-    list_table = db['list'];
-    items = [dict(item) for item in list_table.find()];
+    items = get_items()
     assert len(items) == 5
 
     descriptions = [item['description'] for item in items]
