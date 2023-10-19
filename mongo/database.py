@@ -1,7 +1,16 @@
-from mongita import MongitaClientDisk
-from bson.objectid import ObjectId
+from pymongo.mongo_client import MongoClient
+from pymongo.server_api import ServerApi
+from bson import ObjectId
 
-client = MongitaClientDisk(host='./shopping-list')
+uri = "mongodb+srv://mhaywort:F4oggeRBz3RyDV38@example-cluster.3ykyd8t.mongodb.net/?retryWrites=true&w=majority"
+
+client = MongoClient(uri, server_api=ServerApi('1'))
+try:
+    client.admin.command('ping')
+    print("Pinged your deployment. You successfully connected to MongoDB!")
+except Exception as e:
+    print(e)
+
 shopping_list_db = client.shopping_list_db
 
 def set_up_database() :
